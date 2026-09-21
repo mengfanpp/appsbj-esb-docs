@@ -87,3 +87,7 @@ cd /Users/mengfd/workspace/esb/runtimes/wso2mi-4.6.0
 | 9164 | Management API HTTPS |
 
 业务基址：`http://localhost:8290`。
+
+## 开发与管理界面
+
+MI 没有内置网页控制台。要用图形化开发或集中管理，见 [product-integrator-mi-tooling.md](./product-integrator-mi-tooling.md)（VS Code / Cursor 扩展、ICP）。
