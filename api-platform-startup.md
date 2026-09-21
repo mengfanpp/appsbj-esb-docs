@@ -2,7 +2,7 @@
 
 从本仓库把 **API Platform Gateway** 跑起来，注册示例 API，并打通一次业务请求。
 
-本步骤只启动网关（Gateway-Controller、Gateway Runtime、示例后端）。不启动 Management Portal、API Portal、Platform API。
+前半部分只启动网关。要看管理端，后半部分再启动 API Portal 和 API Control Plane，不使用 `distribution/all-in-one`。
 
 先进入网关目录，后面的 `setup.sh`、`docker compose`、YAML 路径都相对这里：
 
@@ -110,3 +110,67 @@ docker compose down
 
 
 管理 API 基址：`http://localhost:9090/api/management/v1`。
+
+## 9. API Portal
+
+开发者门户。与网关分开启动，使用官方镜像，不编译源码。它会同时带上 Platform API（登录和令牌），这是门户和控制台共用的后端，不是 all-in-one。
+
+```bash
+cd /Users/mengfd/workspace/esb/apps/api-platform/portals/api-portal
+ADMIN_USERNAME=admin ADMIN_PASSWORD=admin ../scripts/setup.sh
+docker compose up
+```
+
+`setup.sh` 会在 `.env` 写入 `COMPOSE_PROFILES=api-portal,platform-api`。compose 使用已发布的 `platform-api:0.16.0`，并挂载 `resources/platform-api-role-to-scope-mapping.yaml`（去掉了该版本 OpenAPI 尚不支持的 `ap:api_portal:*`）。看到容器起来后打开：
+
+```text
+https://localhost:9543/api-portal/default/views/default
+```
+
+证书是自签的，浏览器里继续访问即可。用上面的 `admin` / `admin` 登录。目录为空是正常的，门户里的 API 要另外发布，和网关上已注册的 echo API 不是同一份数据。
+
+后台启动在 `docker compose up` 末尾加 `-d`。停止：
+
+```bash
+docker compose down
+```
+
+## 10. API Control Plane
+
+管理控制台。仓库里没有单独的 compose，在本机跑 BFF 和前端，连第 9 步已经起来的 Platform API（`https://localhost:9243`）。
+
+需要 Node.js 24 和可用的 Go。先确认第 9 步的 Platform API 已启动，再开两个终端。
+
+终端 A，BFF（HTTP `8082`）。首次会拉 Go 依赖；国内访问不了 `proxy.golang.org` 时加上 `GOPROXY`：
+
+```bash
+cd /Users/mengfd/workspace/esb/apps/api-platform/portals/api-control-plane
+GOPROXY=https://goproxy.cn,direct CONTROL_PLANE_URL=https://localhost:9243 make bff-run
+```
+
+日志出现 `api-control-plane-bff listening` 且 `addr=:8082` 后继续。
+
+终端 B，页面（HTTPS `3000`）：
+
+```bash
+cd /Users/mengfd/workspace/esb/apps/api-platform/portals/api-control-plane
+npm install
+npm run dev
+```
+
+打开：
+
+```text
+https://localhost:3000
+```
+
+用第 9 步的 `admin` / `admin` 登录。
+
+## 管理端端口
+
+| 端口 | 用途 |
+|---:|---|
+| 9543 | API Portal（HTTPS） |
+| 9243 | Platform API（门户和控制台共用） |
+| 8082 | API Control Plane BFF |
+| 3000 | API Control Plane 页面（HTTPS） |
