@@ -8,7 +8,7 @@
 |---|---|
 | [architecture.md](./architecture.md) | 核心系统与周边管理：架构、端口、语言 |
 | [api-platform-startup.md](./api-platform-startup.md) | API Platform Gateway 本地启动 |
-| [product-apim-startup.md](./product-apim-startup.md) | WSO2 API Manager（all-in-one 本地启动） |
+| [product-apim-startup.md](./product-apim-startup.md) | WSO2 API Manager（源码构建 / 本地启动） |
 | [product-integrator-mi-startup.md](./product-integrator-mi-startup.md) | Integrator MI 本地启动 |
 | [product-integrator-mi-tooling.md](./product-integrator-mi-tooling.md) | MI：VS Code/Cursor 扩展与 ICP |
 | [gateway-mi-hello.md](./gateway-mi-hello.md) | 网关对接 MI（HelloWorld） |
